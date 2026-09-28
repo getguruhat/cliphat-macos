@@ -1,0 +1,6 @@
+.build/
+.swiftpm/
+.DS_Store
+ClipHat.app/
+*.dmg
+!ClipHat-1.0.2-install.dmg
