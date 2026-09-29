@@ -23,13 +23,16 @@ struct ClipboardHistoryView: View {
     @ObservedObject var store: ClipboardStore
     @ObservedObject var preferences: Preferences
     @ObservedObject var state: PickerState
+    @Environment(\.colorScheme) private var colorScheme
     let restore: (ClipboardItem) -> Void
     let showSettings: () -> Void
     let togglePause: () -> Void
     let togglePanelPin: () -> Void
     let close: () -> Void
     @FocusState private var searchFocused: Bool
-    private var isDark: Bool { preferences.appearance == .dark }
+    // In System mode, use the effective SwiftUI scheme so the panel background
+    // stays in sync with its rows when macOS changes appearance.
+    private var isDark: Bool { colorScheme == .dark }
     private var filtered: [ClipboardItem] {
         store.items.filter { item in
             item.matches(state.query) && (state.filter == .all ||
