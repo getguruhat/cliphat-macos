@@ -61,7 +61,7 @@ Requires macOS 13 or later and Apple Swift command-line tools (Swift 5.9 or late
 
 ### Install the latest build
 
-Download the ready-to-install package: [ClipHat-1.0.2-install.dmg](ClipHat-1.0.2-install.dmg).
+Download the ready-to-install package from [GitHub Releases](https://github.com/getguruhat/cliphat-macos/releases/latest): [ClipHat-1.0.2-install.dmg](https://github.com/getguruhat/cliphat-macos/releases/download/v1.0.2/ClipHat-1.0.2-install.dmg).
 
 Open the DMG, drag **ClipHat** to Applications, and launch it. macOS may ask you to confirm opening an ad-hoc signed app built for this Mac.
 
@@ -84,6 +84,10 @@ Run the test suite with:
 ```
 
 The app is locally ad-hoc signed for the current Mac architecture. Distribution to other Macs requires Developer ID signing and notarization.
+
+## Other platforms
+
+ClipHat for Windows is a separate native app with the same local-first approach. Download it from the [ClipHat for Windows releases](https://github.com/getguruhat/cliphat-windows/releases/latest).
 
 ## Storage and privacy
 
