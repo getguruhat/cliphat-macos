@@ -2,9 +2,17 @@
 
 **Your clipboard, always at hand.**
 
+![ClipHat clipboard history panel on the right side of a Mac screen](docs/cliphat-panel.png)
+
 ClipHat is a native macOS clipboard-history utility from GuruHat. It stores recent text, links, images, and documents locally so they can be found, copied, restored, or dragged into another app such as Codex.
 
 It is built with Swift, SwiftUI, AppKit, and SQLite. It has no accounts, cloud service, analytics, or downloaded runtime dependencies.
+
+## Download
+
+Download the ready-to-install package from [GitHub Releases](https://github.com/getguruhat/cliphat-macos/releases/latest): [ClipHat-1.0.2-install.dmg](https://github.com/getguruhat/cliphat-macos/releases/download/v1.0.2/ClipHat-1.0.2-install.dmg).
+
+Open the DMG, drag **ClipHat** to Applications, and launch it. macOS may ask you to confirm opening an ad-hoc signed app built for this Mac.
 
 ## Features
 
@@ -59,11 +67,7 @@ Quick Look provides document previews when macOS supports the file type. A stand
 
 Requires macOS 13 or later and Apple Swift command-line tools (Swift 5.9 or later).
 
-### Install the latest build
-
-Download the ready-to-install package from [GitHub Releases](https://github.com/getguruhat/cliphat-macos/releases/latest): [ClipHat-1.0.2-install.dmg](https://github.com/getguruhat/cliphat-macos/releases/download/v1.0.2/ClipHat-1.0.2-install.dmg).
-
-Open the DMG, drag **ClipHat** to Applications, and launch it. macOS may ask you to confirm opening an ad-hoc signed app built for this Mac.
+To build it yourself:
 
 ```sh
 ./build-app.sh
