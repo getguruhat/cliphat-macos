@@ -9,6 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var hotKey: HotKeyManager!
     private var statusItem: NSStatusItem!
     private var settingsWindow: NSWindow?
+    private let updates = UpdateChecker(appName: "ClipHat", repo: "getguruhat/cliphat-macos")
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         preferences = Preferences(); store = ClipboardStore()
@@ -29,6 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         createEditMenu(); createStatusItem(); monitor.start(); store.trim(limit: preferences.limit)
         if CommandLine.arguments.contains("--show-history") { picker.show() }
+        updates.start()
     }
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         picker.show(); return true
@@ -128,7 +130,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 530, height: 430), styleMask: [.titled, .closable], backing: .buffered, defer: false)
             window.title = "ClipHat Settings"; window.isReleasedWhenClosed = false; window.hidesOnDeactivate = false
             window.appearance = preferences.appearance.nsAppearance
-            window.contentView = NSHostingView(rootView: SettingsView(preferences: preferences, store: store,
+            window.contentView = NSHostingView(rootView: SettingsView(preferences: preferences, store: store, updates: updates,
                 clearAll: { [weak self] in self?.clearAll() }, quit: { [weak self] in self?.quit() }))
             window.center(); settingsWindow = window
         }
