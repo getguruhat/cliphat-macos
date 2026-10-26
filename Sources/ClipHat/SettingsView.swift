@@ -5,6 +5,7 @@ import ClipHatCore
 struct SettingsView: View {
     @ObservedObject var preferences: Preferences
     @ObservedObject var store: ClipboardStore
+    @ObservedObject var updates: UpdateChecker
     let clearAll: () -> Void
     let quit: () -> Void
     var body: some View {
@@ -72,7 +73,10 @@ struct SettingsView: View {
                 Image(systemName: "clipboard").font(.system(size: 44)).foregroundStyle(.secondary)
                 Text("ClipHat").font(.title.bold())
                 Text("Never lose something you copied.")
-                Text("Version 1.0.0 · Part of GuruHat").foregroundStyle(.secondary)
+                Text("Version \(updates.currentVersion) · Part of GuruHat").foregroundStyle(.secondary)
+                if let update = updates.available {
+                    Link("Download ClipHat \(update.version) ›", destination: update.page)
+                }
                 Text("Free & Open Source · MIT License").font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 Text("No accounts. No cloud. No analytics.").font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }.frame(maxWidth: .infinity, maxHeight: .infinity).tabItem { Label("About", systemImage: "info.circle") }
