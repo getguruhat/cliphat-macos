@@ -79,8 +79,14 @@ struct SettingsView: View {
                 }
                 Text("Free & Open Source · MIT License").font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 Text("No accounts. No cloud. No analytics.").font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                Divider().padding(.horizontal, 40)
+                // GuruHat's shared donation page (same as AI Meter and PC Mode).
+                Link(destination: URL(string: "https://www.paypal.com/donate/?hosted_button_id=FHGYWD46722JS")!) {
+                    Label("Support ClipHat", systemImage: "heart.fill")
+                }
+                Text("Thank you for supporting this project!").font(.caption).foregroundStyle(.secondary)
             }.frame(maxWidth: .infinity, maxHeight: .infinity).tabItem { Label("About", systemImage: "info.circle") }
-        }.padding(20).frame(width: 490, height: 390)
+        }.padding(20).frame(width: 490, height: 440)
         .onAppear { preferences.refreshLogin() }
         .preferredColorScheme(preferences.appearance.colorScheme)
     }
