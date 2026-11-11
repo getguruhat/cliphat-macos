@@ -89,6 +89,8 @@ Run the test suite with:
 
 The app is locally ad-hoc signed for the current Mac architecture. Distribution to other Macs requires Developer ID signing and notarization.
 
+⭐ **Star this repo if ClipHat saves you a trip back to a copied thing.** Questions and ideas are welcome in [Discussions](https://github.com/getguruhat/cliphat-macos/discussions).
+
 ## Other platforms
 
 ClipHat for Windows is a separate native app with the same local-first approach. Download it from the [ClipHat for Windows releases](https://github.com/getguruhat/cliphat-windows/releases/latest).
