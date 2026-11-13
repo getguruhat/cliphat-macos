@@ -75,40 +75,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem?.button?.image = image
         statusItem?.button?.toolTip = preferences.paused ? "ClipHat — History paused" : "ClipHat — ⌘⇧V"
     }
-    private func menuBarHatImage() -> NSImage {
-        let image = NSImage(size: NSSize(width: 22, height: 16))
-        image.lockFocus()
-        NSColor.black.setStroke()
-
-        let brim = NSBezierPath(ovalIn: NSRect(x: 0.8, y: 0.8, width: 20.4, height: 7.2))
-        brim.lineWidth = 1.5
-        brim.stroke()
-
-        let crown = NSBezierPath()
-        crown.move(to: NSPoint(x: 5.2, y: 5.1))
-        crown.curve(to: NSPoint(x: 6.4, y: 13.1), controlPoint1: NSPoint(x: 5.3, y: 9), controlPoint2: NSPoint(x: 5.8, y: 12.3))
-        crown.curve(to: NSPoint(x: 12.4, y: 14.5), controlPoint1: NSPoint(x: 8.1, y: 15.2), controlPoint2: NSPoint(x: 10.4, y: 13.9))
-        crown.curve(to: NSPoint(x: 16.3, y: 5.1), controlPoint1: NSPoint(x: 15.3, y: 15.3), controlPoint2: NSPoint(x: 16, y: 10.6))
-        crown.curve(to: NSPoint(x: 5.2, y: 5.1), controlPoint1: NSPoint(x: 13.2, y: 2.8), controlPoint2: NSPoint(x: 8.2, y: 2.8))
-        crown.lineWidth = 1.6
-        crown.lineCapStyle = .round
-        crown.lineJoinStyle = .round
-        crown.stroke()
-
-        let band = NSBezierPath()
-        band.move(to: NSPoint(x: 5.4, y: 7.2))
-        band.curve(to: NSPoint(x: 16, y: 7.2), controlPoint1: NSPoint(x: 8.5, y: 5.7), controlPoint2: NSPoint(x: 12.6, y: 5.7))
-        band.lineWidth = 1.4
-        band.stroke()
-
-        let flourish = NSBezierPath()
-        flourish.move(to: NSPoint(x: 8.2, y: 12.8))
-        flourish.curve(to: NSPoint(x: 13, y: 13.6), controlPoint1: NSPoint(x: 8.3, y: 10.7), controlPoint2: NSPoint(x: 10.4, y: 12.5))
-        flourish.lineWidth = 1.1
-        flourish.lineCapStyle = .round
-        flourish.stroke()
-
-        image.unlockFocus()
+    private func menuBarHatImage() -> NSImage? {
+        guard let url = Bundle.main.url(forResource: "ClipHatMenuIcon", withExtension: "png"),
+              let image = NSImage(contentsOf: url) else {
+            return NSImage(systemSymbolName: "doc.on.clipboard", accessibilityDescription: "ClipHat")
+        }
+        image.size = NSSize(width: 18, height: 18)
         image.isTemplate = true
         return image
     }
@@ -127,7 +99,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     @objc private func settings() {
         if settingsWindow == nil {
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 530, height: 430), styleMask: [.titled, .closable], backing: .buffered, defer: false)
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 490, height: 590), styleMask: [.titled, .closable], backing: .buffered, defer: false)
             window.title = "ClipHat Settings"; window.isReleasedWhenClosed = false; window.hidesOnDeactivate = false
             window.appearance = preferences.appearance.nsAppearance
             window.contentView = NSHostingView(rootView: SettingsView(preferences: preferences, store: store, updates: updates,
