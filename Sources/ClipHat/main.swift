@@ -26,7 +26,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         hotKey = HotKeyManager(); hotKey.onPress = { [weak self] in self?.picker.toggle() }
         if hotKey.register() != noErr {
-            preferences.shortcutMessage = "⌘⇧V is unavailable. Another app may be using it. Open history from the menu bar."
+            preferences.shortcutMessage = Strings.text(.shortcutUnavailable)
         }
         createEditMenu(); createStatusItem(); monitor.start(); store.trim(limit: preferences.limit)
         if CommandLine.arguments.contains("--show-history") { picker.show() }
@@ -43,13 +43,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let menu = NSMenu()
         let appItem = NSMenuItem(title: "ClipHat", action: nil, keyEquivalent: "")
         let appMenu = NSMenu(title: "ClipHat")
-        add("Settings…", #selector(settings), to: appMenu, key: ",")
+        add(Strings.text(.settings) + "…", #selector(settings), to: appMenu, key: ",")
         appMenu.addItem(.separator())
-        add("Quit ClipHat", #selector(quit), to: appMenu, key: "q")
+        add(Strings.text(.quitClipHat), #selector(quit), to: appMenu, key: "q")
         appItem.submenu = appMenu; menu.addItem(appItem)
-        let item = NSMenuItem(title: "Edit", action: nil, keyEquivalent: "")
-        let edit = NSMenu(title: "Edit")
-        for (title, action, key) in [("Cut", "cut:", "x"), ("Copy", "copy:", "c"), ("Paste", "paste:", "v"), ("Select All", "selectAll:", "a")] {
+        let item = NSMenuItem(title: Strings.text(.menuEdit), action: nil, keyEquivalent: "")
+        let edit = NSMenu(title: Strings.text(.menuEdit))
+        for (title, action, key) in [(Strings.text(.menuCut), "cut:", "x"), (Strings.text(.menuCopy), "copy:", "c"), (Strings.text(.menuPaste), "paste:", "v"), (Strings.text(.menuSelectAll), "selectAll:", "a")] {
             edit.addItem(NSMenuItem(title: title, action: Selector(action), keyEquivalent: key))
         }
         item.submenu = edit; menu.addItem(item); NSApp.mainMenu = menu
@@ -67,13 +67,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func updateStatus() {
         let image: NSImage?
         if preferences.paused {
-            image = NSImage(systemSymbolName: "pause.circle", accessibilityDescription: "ClipHat paused")
+            image = NSImage(systemSymbolName: "pause.circle", accessibilityDescription: Strings.text(.historyPaused))
             image?.isTemplate = true
         } else {
             image = menuBarHatImage()
         }
         statusItem?.button?.image = image
-        statusItem?.button?.toolTip = preferences.paused ? "ClipHat — History paused" : "ClipHat — ⌘⇧V"
+        statusItem?.button?.toolTip = preferences.paused ? Strings.text(.historyPaused) : "ClipHat — ⌘⇧V"
     }
     private func menuBarHatImage() -> NSImage? {
         guard let url = Bundle.main.url(forResource: "ClipHatMenuIcon", withExtension: "png"),
@@ -92,15 +92,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func togglePause() { preferences.paused.toggle() }
     @objc private func clearAll() {
         NSApp.activate(ignoringOtherApps: true)
-        let alert = NSAlert(); alert.messageText = "Clear all clipboard history?"
-        alert.informativeText = "This permanently deletes every saved item, including pinned items. The current macOS clipboard is unchanged."
-        alert.alertStyle = .warning; alert.addButton(withTitle: "Cancel"); alert.addButton(withTitle: "Clear All History")
+        let alert = NSAlert(); alert.messageText = Strings.text(.clearAllConfirm)
+        alert.informativeText = Strings.text(.clearAllDetail)
+        alert.alertStyle = .warning; alert.addButton(withTitle: Strings.text(.cancel)); alert.addButton(withTitle: Strings.text(.clearAllButton))
         if alert.runModal() == .alertSecondButtonReturn { store.clear(includePinned: true) }
     }
     @objc private func settings() {
         if settingsWindow == nil {
             let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 490, height: 590), styleMask: [.titled, .closable], backing: .buffered, defer: false)
-            window.title = "ClipHat Settings"; window.isReleasedWhenClosed = false; window.hidesOnDeactivate = false
+            window.title = Strings.text(.settingsTitle); window.isReleasedWhenClosed = false; window.hidesOnDeactivate = false
             window.appearance = preferences.appearance.nsAppearance
             window.contentView = NSHostingView(rootView: SettingsView(preferences: preferences, store: store, updates: updates,
                 clearAll: { [weak self] in self?.clearAll() }, quit: { [weak self] in self?.quit() }))

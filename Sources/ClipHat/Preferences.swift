@@ -7,8 +7,15 @@ enum PanelPosition: String, CaseIterable, Codable, Identifiable {
     case left, right, top, bottom
 
     var id: String { rawValue }
-    var title: String { rawValue.capitalized }
-    var tooltip: String { "Open from \(rawValue)" }
+    var title: String {
+        switch self {
+        case .left: Strings.text(.left)
+        case .right: Strings.text(.right)
+        case .top: Strings.text(.top)
+        case .bottom: Strings.text(.bottom)
+        }
+    }
+    var tooltip: String { Strings.text(.panelPositionTip, title) }
     var isHorizontal: Bool { self == .top || self == .bottom }
 }
 
@@ -16,7 +23,13 @@ enum AppAppearance: String, CaseIterable, Identifiable {
     case system, light, dark
 
     var id: String { rawValue }
-    var title: String { rawValue.capitalized }
+    var title: String {
+        switch self {
+        case .system: Strings.text(.appearanceSystem)
+        case .light: Strings.text(.appearanceLight)
+        case .dark: Strings.text(.appearanceDark)
+        }
+    }
     var colorScheme: ColorScheme? {
         switch self {
         case .system: nil
@@ -77,7 +90,7 @@ final class Preferences: ObservableObject {
     }
     func refreshLogin() {
         loginEnabled = SMAppService.mainApp.status == .enabled
-        if SMAppService.mainApp.status == .requiresApproval { loginMessage = "Allow ClipHat in System Settings → General → Login Items." }
+        if SMAppService.mainApp.status == .requiresApproval { loginMessage = Strings.text(.loginApproval) }
     }
     func setLogin(_ enabled: Bool) {
         do {
@@ -87,7 +100,7 @@ final class Preferences: ObservableObject {
     }
     func addIgnoredApps() {
         let panel = NSOpenPanel()
-        panel.title = "Ignore clipboard activity from applications"
+        panel.title = Strings.text(.ignoreDialogTitle)
         panel.directoryURL = URL(fileURLWithPath: "/Applications")
         panel.allowedContentTypes = [.applicationBundle]
         panel.allowsMultipleSelection = true; panel.canChooseDirectories = false

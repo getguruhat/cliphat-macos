@@ -14,6 +14,16 @@ final class PickerState: ObservableObject {
 enum ContentFilter: String, CaseIterable, Identifiable {
     case all, text, links, media, documents, audio
     var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .all: Strings.text(.allItems)
+        case .text: Strings.text(.text)
+        case .links: Strings.text(.links)
+        case .media: Strings.text(.images)
+        case .documents: Strings.text(.documents)
+        case .audio: Strings.text(.audio)
+        }
+    }
     var symbol: String {
         switch self { case .all: "square.grid.2x2"; case .text: "textformat"; case .links: "link"; case .media: "photo"; case .documents: "doc.text"; case .audio: "music.note" }
     }
@@ -44,12 +54,12 @@ struct ClipboardHistoryView: View {
             if state.searchVisible {
                 HStack(spacing: 10) {
                     Image(systemName: "magnifyingglass").foregroundStyle(Theme.secondary)
-                    TextField("Search clipboard…", text: $state.query)
+                    TextField(Strings.text(.searchPlaceholder), text: $state.query)
                         .textFieldStyle(.plain).font(.system(size: 14)).foregroundStyle(Theme.text).focused($searchFocused)
-                        .accessibilityLabel("Search clipboard")
+                        .accessibilityLabel(Strings.text(.searchPlaceholder))
                     if !state.query.isEmpty {
                         Button { state.query = "" } label: { Image(systemName: "xmark.circle.fill") }
-                            .buttonStyle(.plain).foregroundStyle(Theme.secondary).help("Clear search")
+                            .buttonStyle(.plain).foregroundStyle(Theme.secondary).help(Strings.text(.clearSearch))
                     }
                 }
                 .padding(.horizontal, 14).frame(height: 36)
@@ -58,14 +68,14 @@ struct ClipboardHistoryView: View {
                 .padding(.horizontal, 12).padding(.top, 12)
             }
             HStack(spacing: 2) {
-                filterButton(symbol: "magnifyingglass", active: state.searchVisible, help: "Search clipboard") {
+                filterButton(symbol: "magnifyingglass", active: state.searchVisible, help: Strings.text(.searchTip, "⌘F")) {
                     state.searchVisible.toggle()
                     if state.searchVisible { state.focusRequest = UUID() }
                 }
                 ForEach(ContentFilter.allCases) { filter in
                     filterButton(icon: filterIcon(for: filter), active: state.filter == filter,
-                                 help: filter.rawValue.capitalized) { state.filter = filter }
-                        .accessibilityLabel("Show \(filter.rawValue)")
+                                 help: filter.title) { state.filter = filter }
+                        .accessibilityLabel(Strings.text(.showFilter, filter.title))
                 }
             }
             .padding(3)
@@ -78,7 +88,7 @@ struct ClipboardHistoryView: View {
                 Text(error).font(.caption).foregroundStyle(Theme.red).padding(10)
             }
             if preferences.paused {
-                Label("Clipboard history is paused", systemImage: "pause.circle.fill")
+                Label(Strings.text(.capturePaused), systemImage: "pause.circle.fill")
                     .font(.caption.weight(.medium)).foregroundStyle(Theme.orange).padding(8)
             }
             if filtered.isEmpty {
@@ -87,33 +97,33 @@ struct ClipboardHistoryView: View {
                         .font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.accent)
                         .frame(width: 44, height: 44)
                         .background(Circle().fill(Theme.accent.opacity(0.13)))
-                    Text(state.query.isEmpty ? "Never lose something you copied." : "No matching items")
+                    Text(state.query.isEmpty ? Strings.text(.tagline) : Strings.text(.noMatches))
                         .font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.text)
-                    Text(state.query.isEmpty ? "Copy text, a link, or an image to get started." : "Try a different search.")
+                    Text(state.query.isEmpty ? Strings.text(.emptyHint) : Strings.text(.tryDifferentSearch))
                         .font(.system(size: 12)).foregroundStyle(Theme.secondary)
                 }.frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 history
             }
             HStack(spacing: 6) {
-                Text("\(filtered.count) item\(filtered.count == 1 ? "" : "s")")
+                Text(Strings.itemCount(filtered.count))
                     .font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.secondary)
                     .padding(.horizontal, 10).frame(height: 26)
                     .background(Capsule().fill(Theme.card))
                 Spacer()
                 if state.restoring {
-                    Text("Restoring…").font(.system(size: 12)).foregroundStyle(Theme.secondary)
+                    Text(Strings.text(.restoring)).font(.system(size: 12)).foregroundStyle(Theme.secondary)
                 }
                 toolbarButton(preferences.largePreviews ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right",
-                              preferences.largePreviews ? "Switch to compact cards" : "Switch to large previews (2× cards)",
+                              preferences.largePreviews ? Strings.text(.compactCards) : Strings.text(.largePreviews),
                               active: preferences.largePreviews) { preferences.largePreviews.toggle() }
                 toolbarButton(preferences.paused ? "play.fill" : "pause.fill",
-                              preferences.paused ? "Resume Clipboard History" : "Pause Clipboard History",
+                              preferences.paused ? Strings.text(.resumeCaptureTip) : Strings.text(.pauseCaptureTip),
                               active: preferences.paused, action: togglePause)
                 toolbarButton(preferences.panelPinned ? "pin.fill" : "pin",
-                              preferences.panelPinned ? "Allow panel to auto-close" : "Keep panel open",
+                              preferences.panelPinned ? Strings.text(.unpinPanel) : Strings.text(.keepPanelOpen),
                               active: preferences.panelPinned, action: togglePanelPin)
-                toolbarButton("gearshape", "Settings", action: showSettings)
+                toolbarButton("gearshape", Strings.text(.settings), action: showSettings)
             }.padding(.horizontal, 12).padding(.vertical, 10)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -228,9 +238,9 @@ struct ClipboardHistoryView: View {
         if !filtered.contains(where: { $0.id == state.selected }) { state.selected = filtered.first?.id }
     }
     private func dayLabel(_ date: Date) -> String {
-        if Calendar.current.isDateInToday(date) { return "Today" }
-        if Calendar.current.isDateInYesterday(date) { return "Yesterday" }
-        return date.formatted(date: .abbreviated, time: .omitted)
+        if Calendar.current.isDateInToday(date) { return Strings.text(.today) }
+        if Calendar.current.isDateInYesterday(date) { return Strings.text(.yesterday) }
+        return Strings.dayName(date)
     }
 }
 
@@ -253,10 +263,10 @@ struct ClipboardRowView: View {
     var body: some View {
         card
         .contextMenu {
-            Button("Copy to Clipboard", action: select)
-            Button(item.pinned ? "Unpin" : "Pin", action: pin)
+            Button(Strings.text(.copyToClipboard), action: select)
+            Button(item.pinned ? Strings.text(.unpinItem) : Strings.text(.pinItem), action: pin)
             Divider()
-            Button("Delete", role: .destructive, action: delete)
+            Button(Strings.text(.delete), role: .destructive, action: delete)
         }
         .accessibilityElement(children: .contain)
         .accessibilityAddTraits(selected ? [.isSelected] : [])
@@ -289,10 +299,10 @@ struct ClipboardRowView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .clipped()
                         if item.kind == .image {
-                            Text("Image - \(images.metadata.replacingOccurrences(of: " · ", with: " - "))")
+                            Text("\(Strings.text(.image)) - \(images.metadata.replacingOccurrences(of: " · ", with: " - "))")
                                 .font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.text).lineLimit(1).minimumScaleFactor(0.85)
                         } else {
-                            Text("\(item.filename ?? "File") - \(images.metadata.split(separator: "·").last?.trimmingCharacters(in: .whitespaces) ?? "File")")
+                            Text("\(item.filename ?? Strings.text(.file)) - \(images.metadata.split(separator: "·").last?.trimmingCharacters(in: .whitespaces) ?? Strings.text(.file))")
                                 .font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.text).lineLimit(1).minimumScaleFactor(0.85)
                         }
                     }.frame(maxWidth: .infinity, maxHeight: .infinity).contentShape(Rectangle())
@@ -312,7 +322,7 @@ struct ClipboardRowView: View {
                                 .background(tint.opacity(0.13), in: Circle())
                         }
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(item.kind == .image || item.kind == .document || item.kind == .audio ? (item.filename ?? "File") : (item.text ?? "Image"))
+                            Text(item.kind == .image || item.kind == .document || item.kind == .audio ? (item.filename ?? Strings.text(.file)) : (item.text ?? Strings.text(.image)))
                                 .font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
                             Text(images.metadata).font(.system(size: 12)).foregroundStyle(Theme.secondary).lineLimit(1)
                             Text(sourceName).help(hoverText)
@@ -336,7 +346,7 @@ struct ClipboardRowView: View {
                                 .background(tint.opacity(0.13), in: Circle())
                         }
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(item.kind == .image || item.kind == .document || item.kind == .audio ? (item.filename ?? "File") : (item.text ?? "Image"))
+                            Text(item.kind == .image || item.kind == .document || item.kind == .audio ? (item.filename ?? Strings.text(.file)) : (item.text ?? Strings.text(.image)))
                                 .font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.text).lineLimit(2)
                                 .multilineTextAlignment(.leading)
                             Text(images.metadata).font(.system(size: 12)).foregroundStyle(Theme.secondary).lineLimit(1)
@@ -364,8 +374,8 @@ struct ClipboardRowView: View {
     private var deleteButton: some View {
         Button(action: delete) { Image(systemName: "xmark") }
             .buttonStyle(CircleButtonStyle(size: 18))
-            .help("Delete this item")
-            .accessibilityLabel("Delete this item")
+            .help(Strings.text(.deleteItem))
+            .accessibilityLabel(Strings.text(.deleteItem))
     }
 
     private func loadImages() {
@@ -378,7 +388,7 @@ struct ClipboardRowView: View {
 
     private var sourceName: String {
         guard let source = item.source,
-              let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: source) else { return "Unknown source" }
+              let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: source) else { return Strings.text(.unknownSource) }
         return FileManager.default.displayName(atPath: url.path)
     }
 

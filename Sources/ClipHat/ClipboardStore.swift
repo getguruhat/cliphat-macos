@@ -50,7 +50,7 @@ final class ClipboardStore: ObservableObject {
             let values = try url.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
             let maximum = (kind == .image ? 10 : 20) * 1024 * 1024
             guard values.isRegularFile == true, let size = values.fileSize, size <= maximum else {
-                throw NSError(domain: "ClipHat", code: 1, userInfo: [NSLocalizedDescriptionKey: "\(url.lastPathComponent): unsupported file or size limit exceeded."])
+                throw NSError(domain: "ClipHat", code: 1, userInfo: [NSLocalizedDescriptionKey: Strings.text(.unsupportedFile, url.lastPathComponent)])
             }
             let data = try Data(contentsOf: url)
             guard data.count <= maximum else { throw CocoaError(.fileReadTooLarge) }
@@ -60,7 +60,7 @@ final class ClipboardStore: ObservableObject {
         }
     }
     private func report(_ failure: Error) {
-        DispatchQueue.main.async { self.error = "History could not be saved or read: \(failure.localizedDescription)" }
+        DispatchQueue.main.async { self.error = Strings.text(.historyFailed, failure.localizedDescription) }
     }
     private func publish() throws {
         guard let database else { return }
@@ -125,19 +125,19 @@ final class ClipboardStore: ObservableObject {
         switch item.kind {
         case .text:
             let count = item.text?.count ?? 0
-            completion("Text · \(count) character\(count == 1 ? "" : "s")")
+            completion(Strings.text(.textMeta, String(count)))
         case .link:
-            let host = item.text.flatMap(URL.init(string:))?.host ?? "Link"
-            completion("Link · \(host)")
+            let host = item.text.flatMap(URL.init(string:))?.host ?? Strings.text(.link)
+            completion("\(Strings.text(.link)) · \(host)")
         case .document:
             let ext = item.filename.flatMap { URL(fileURLWithPath: $0).pathExtension.uppercased() } ?? "FILE"
-            completion("Document · \(ext)")
+            completion(Strings.text(.fileOfType, ext))
         case .audio:
             let ext = item.filename.flatMap { URL(fileURLWithPath: $0).pathExtension.uppercased() } ?? "AUDIO"
             queue.async { [self] in
                 do {
                     guard let data = try database?.imageData(id: item.id) else {
-                        DispatchQueue.main.async { completion("Audio · \(ext)") }; return
+                        DispatchQueue.main.async { completion("\(Strings.text(.audio)) · \(ext)") }; return
                     }
                     let suffix = item.filename.map { "." + URL(fileURLWithPath: $0).pathExtension } ?? ""
                     let url = FileManager.default.temporaryDirectory
@@ -150,11 +150,11 @@ final class ClipboardStore: ObservableObject {
                         let seconds = time.map(CMTimeGetSeconds)
                         let duration = seconds.flatMap { $0.isFinite && $0 >= 0 ? Self.audioDuration($0) : nil }
                         await MainActor.run {
-                            completion(["Audio", ext, duration].compactMap { $0 }.joined(separator: " · "))
+                            completion([Strings.text(.audio), ext, duration].compactMap { $0 }.joined(separator: " · "))
                         }
                     }
                 } catch {
-                    DispatchQueue.main.async { completion("Audio · \(ext)") }
+                    DispatchQueue.main.async { completion("\(Strings.text(.audio)) · \(ext)") }
                 }
             }
         case .image:
@@ -162,17 +162,17 @@ final class ClipboardStore: ObservableObject {
                 do {
                     guard let data = try database?.imageData(id: item.id),
                           let source = CGImageSourceCreateWithData(data as CFData, nil) else {
-                        DispatchQueue.main.async { completion("Image") }; return
+                        DispatchQueue.main.async { completion(Strings.text(.image)) }; return
                     }
                     let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any]
                     let width = properties?[kCGImagePropertyPixelWidth] as? Int
                     let height = properties?[kCGImagePropertyPixelHeight] as? Int
                     let identifier = CGImageSourceGetType(source) as String?
                     let type = identifier?.split(separator: ".").last?.uppercased() ?? "IMAGE"
-                    let dimensions = width.flatMap { width in height.map { "\(width) × \($0)" } } ?? "Image"
+                    let dimensions = width.flatMap { width in height.map { "\(width) × \($0)" } } ?? Strings.text(.image)
                     DispatchQueue.main.async { completion("\(dimensions) · \(type)") }
                 } catch {
-                    DispatchQueue.main.async { completion("Image") }
+                    DispatchQueue.main.async { completion(Strings.text(.image)) }
                 }
             }
         }

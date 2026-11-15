@@ -18,6 +18,24 @@ func expect(_ condition: @autoclosure () -> Bool, _ message: String) {
     checks += 1
     guard condition() else { fputs("FAIL: \(message)\n", stderr); exit(1) }
 }
+// Localization: same languages as the Windows app, placeholders preserved, English fallback.
+expect(Strings.codes == ["de", "es", "fr", "it", "ja", "ko", "pt", "zh-Hans"], "the same eight languages as Windows")
+for (code, table) in Strings.tables {
+    for key in Strings.Key.allCases {
+        let english = Strings.english[key]!
+        guard let translated = table[key] else { expect(false, "\(code) is missing \(key)"); continue }
+        for placeholder in ["{0}", "{1}"] {
+            expect(english.contains(placeholder) == translated.contains(placeholder), "\(code) \(key) keeps \(placeholder)")
+        }
+    }
+}
+for (identifier, code) in [("de-AT", "de"), ("es-MX", "es"), ("pt-BR", "pt"), ("zh-Hans-CN", "zh-Hans"), ("zh-CN", "zh-Hans"),
+                           ("zh-Hant-TW", "en"), ("zh-TW", "en"), ("nl", "en"), ("en-GB", "en")] {
+    expect(Strings.code(for: identifier) == code, "\(identifier) uses \(code)")
+}
+Strings.use("de"); expect(Strings.itemCount(1) == "1 Eintrag" && Strings.itemCount(3) == "3 Einträge", "German item counts")
+Strings.use("ko"); expect(Strings.text(.textMeta, "5") == "텍스트 · 5자", "Korean text metadata")
+Strings.use("en"); expect(Strings.itemCount(2) == "2 items", "English item counts")
 expect(preferences.panelPosition == .left, "panel position defaults to left")
 for position in PanelPosition.allCases {
     preferences.panelPosition = position

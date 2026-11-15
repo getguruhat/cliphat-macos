@@ -11,7 +11,7 @@ struct SettingsView: View {
     let clearAll: () -> Void
     let quit: () -> Void
     @StateObject private var nav = SettingsNav()
-    private let tabs = ["General", "History", "Privacy", "About"]
+    private var tabs: [String] { [Strings.text(.tabGeneral), Strings.text(.tabHistory), Strings.text(.tabPrivacy), Strings.text(.tabAbout)] }
     var body: some View {
         VStack(spacing: 14) {
             HStack(spacing: 2) {
@@ -84,63 +84,63 @@ struct SettingsView: View {
     // MARK: Tabs
 
     @ViewBuilder private var general: some View {
-        section("Startup") {
-            toggleRow("Launch ClipHat at login", preferences.loginMessage.isEmpty ? nil : preferences.loginMessage, last: true,
+        section(Strings.text(.sectionStartup)) {
+            toggleRow(Strings.text(.launchAtLogin), preferences.loginMessage.isEmpty ? nil : preferences.loginMessage, last: true,
                       isOn: Binding(get: { preferences.loginEnabled }, set: { preferences.setLogin($0) }))
         }
-        section("Panel") {
-            row("Keyboard shortcut", preferences.shortcutMessage.isEmpty ? nil : preferences.shortcutMessage) {
+        section(Strings.text(.sectionPanel)) {
+            row(Strings.text(.keyboardShortcut), preferences.shortcutMessage.isEmpty ? nil : preferences.shortcutMessage) {
                 Text("⌘ ⇧ V").font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(Theme.secondary)
                     .padding(.horizontal, 10).frame(height: 24).background(Capsule().fill(Theme.control))
             }
-            toggleRow("Large previews", "Show images and documents on 2× cards.", isOn: $preferences.largePreviews)
-            row("Position", last: false) { PanelPositionPicker(selection: $preferences.panelPosition) }
-            row("Appearance", last: true) { AppearancePicker(selection: $preferences.appearance) }
+            toggleRow(Strings.text(.largePreviews), Strings.text(.largePreviewsNote), isOn: $preferences.largePreviews)
+            row(Strings.text(.panelPosition), last: false) { PanelPositionPicker(selection: $preferences.panelPosition) }
+            row(Strings.text(.appearance), last: true) { AppearancePicker(selection: $preferences.appearance) }
         }
-        note("Select an item to copy it, then press ⌘V to paste.")
-        Button("Quit ClipHat", action: quit).buttonStyle(TintButtonStyle(color: Theme.red))
+        note(Strings.text(.copyHint, "⌘V"))
+        Button(Strings.text(.quitClipHat), action: quit).buttonStyle(TintButtonStyle(color: Theme.red))
             .frame(maxWidth: .infinity, alignment: .trailing).padding(.horizontal, 6)
     }
     @ViewBuilder private var history: some View {
-        section("Size") {
-            row("Keep \(preferences.limit) items", "Oldest unpinned items go first. Pinned items are always kept.", last: true) {
+        section(Strings.text(.sectionSize)) {
+            row(Strings.text(.keepItems, String(preferences.limit)), Strings.text(.keepItemsNote), last: true) {
                 Stepper("", value: $preferences.limit, in: 10...5000, step: 10).labelsHidden()
             }
         }
-        section("What to save") {
-            toggleRow("Text", isOn: $preferences.storeText)
-            toggleRow("Links", isOn: $preferences.storeLinks)
-            toggleRow("Images", isOn: $preferences.storeImages)
-            toggleRow("Documents and other files", last: true, isOn: $preferences.storeDocuments)
+        section(Strings.text(.saveHeading)) {
+            toggleRow(Strings.text(.text), isOn: $preferences.storeText)
+            toggleRow(Strings.text(.links), isOn: $preferences.storeLinks)
+            toggleRow(Strings.text(.images), isOn: $preferences.storeImages)
+            toggleRow(Strings.text(.documentsAndFiles), last: true, isOn: $preferences.storeDocuments)
         }
-        note("Up to 1 MB per text item, 10 MB per image and 20 MB per file. Unpinned images and files share 200 MB. Folders are not supported.")
-        section("Clear history") {
-            row("Unpinned items", "Keeps everything you pinned.") {
-                Button("Clear") { store.clear(includePinned: false) }.buttonStyle(TintButtonStyle(color: Theme.accent))
+        note(Strings.text(.sizeLimits))
+        section(Strings.text(.sectionClear)) {
+            row(Strings.text(.unpinnedItems), Strings.text(.unpinnedNote)) {
+                Button(Strings.text(.clearButton)) { store.clear(includePinned: false) }.buttonStyle(TintButtonStyle(color: Theme.accent))
             }
-            row("Everything", "Removes pinned items too.", last: true) {
-                Button("Clear All…", action: clearAll).buttonStyle(TintButtonStyle(color: Theme.red))
+            row(Strings.text(.everything), Strings.text(.everythingNote), last: true) {
+                Button(Strings.text(.clearAll), action: clearAll).buttonStyle(TintButtonStyle(color: Theme.red))
             }
         }
     }
     @ViewBuilder private var privacy: some View {
-        section("Ignored apps") {
+        section(Strings.text(.ignoredApps)) {
             let ids = preferences.ignoredApps.sorted()
             if ids.isEmpty {
-                row("No ignored apps", "Clipboard activity from ignored apps is not saved.") { EmptyView() }
+                row(Strings.text(.noIgnoredApps), Strings.text(.ignoredAppsNote)) { EmptyView() }
             }
             ForEach(Array(ids.enumerated()), id: \.element) { index, id in
                 row(appName(id), nil, last: false) {
                     Button { preferences.ignoredApps.remove(id) } label: { Image(systemName: "xmark") }
-                        .buttonStyle(CircleButtonStyle(size: 22)).help("Stop ignoring \(appName(id))")
-                        .accessibilityLabel("Stop ignoring \(appName(id))")
+                        .buttonStyle(CircleButtonStyle(size: 22)).help(Strings.text(.stopIgnoring, appName(id)))
+                        .accessibilityLabel(Strings.text(.stopIgnoring, appName(id)))
                 }
             }
-            row("Add an app", "Clipboard activity from it will not be saved.", last: true) {
-                Button("Add…") { preferences.addIgnoredApps() }.buttonStyle(TintButtonStyle(color: Theme.accent))
+            row(Strings.text(.addApp), Strings.text(.addAppNote), last: true) {
+                Button(Strings.text(.addButton)) { preferences.addIgnoredApps() }.buttonStyle(TintButtonStyle(color: Theme.accent))
             }
         }
-        note("Everything stays on this Mac. Sensitive and transient clipboard markers are skipped. Apps may omit these markers; add any app you want excluded.")
+        note(Strings.text(.privacyNote))
     }
     @ViewBuilder private var about: some View {
         VStack(spacing: 10) {
@@ -148,24 +148,24 @@ struct SettingsView: View {
                 Image(nsImage: icon).resizable().scaledToFit().frame(width: 84, height: 84)
             }
             Text("ClipHat").font(.system(size: 20, weight: .bold))
-            Text("Never lose something you copied.").font(.system(size: 13, weight: .medium))
-            Text("Version \(updates.currentVersion) · Part of GuruHat").font(.system(size: 12)).foregroundStyle(Theme.secondary)
+            Text(Strings.text(.tagline)).font(.system(size: 13, weight: .medium))
+            Text(Strings.text(.versionLine, updates.currentVersion)).font(.system(size: 12)).foregroundStyle(Theme.secondary)
             if let update = updates.available {
-                Link("Download ClipHat \(update.version) ›", destination: update.page)
+                Link(Strings.text(.downloadUpdate, update.version), destination: update.page)
                     .font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.accent)
             }
         }
         .frame(maxWidth: .infinity).multilineTextAlignment(.center)
         .padding(.vertical, 18).card(padding: 14)
-        section("Free and private") {
-            row("Free & open source", "MIT license.") { EmptyView() }
-            row("No accounts, no cloud, no analytics", last: true) { EmptyView() }
+        section(Strings.text(.freeAndPrivate)) {
+            row(Strings.text(.license)) { EmptyView() }
+            row(Strings.text(.noTracking), last: true) { EmptyView() }
         }
-        section("Support") {
-            row("Support ClipHat", "Donations keep GuruHat apps free. Thank you!", last: true) {
+        section(Strings.text(.support)) {
+            row(Strings.text(.support), Strings.text(.thanks), last: true) {
                 // GuruHat's shared donation page (same as AI Meter and PC Mode).
                 Link(destination: URL(string: "https://www.paypal.com/donate/?hosted_button_id=FHGYWD46722JS")!) {
-                    Label("Donate", systemImage: "heart.fill")
+                    Label(Strings.text(.donate), systemImage: "heart.fill")
                 }.font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.accent)
             }
         }
@@ -197,7 +197,7 @@ private struct AppearancePicker: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(selection == appearance ? Theme.accent : .secondary)
-                .accessibilityLabel("Use \(appearance.title) appearance")
+                .accessibilityLabel(Strings.text(.useAppearance, appearance.title))
                 .accessibilityAddTraits(selection == appearance ? .isSelected : [])
             }
         }

@@ -10,7 +10,7 @@ It is built with Swift, SwiftUI, AppKit, and SQLite. It has no accounts, cloud s
 
 ## Download
 
-Download the ready-to-install package from [GitHub Releases](https://github.com/getguruhat/cliphat-macos/releases/latest): [ClipHat-1.0.2-install.dmg](https://github.com/getguruhat/cliphat-macos/releases/download/v1.0.2/ClipHat-1.0.2-install.dmg).
+Download the ready-to-install package from [GitHub Releases](https://github.com/getguruhat/cliphat-macos/releases/latest): [ClipHat-1.0.3-install.dmg](https://github.com/getguruhat/cliphat-macos/releases/download/v1.0.3/ClipHat-1.0.3-install.dmg).
 
 Open the DMG, drag **ClipHat** to Applications, and launch it. macOS may ask you to confirm opening an ad-hoc signed app built for this Mac.
 

@@ -152,7 +152,7 @@ final class PickerController: NSObject, NSWindowDelegate {
         }
         monitor.restore(item) { [weak self] success in
             guard let self else { return }; self.state.restoring = false
-            if success { self.close() } else { self.store.error = "This item could not be restored to the clipboard." }
+            if success { self.close() } else { self.store.error = Strings.text(.restoreFailed) }
         }
     }
     private func handle(_ event: NSEvent) -> Bool {

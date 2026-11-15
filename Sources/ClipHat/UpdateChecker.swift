@@ -9,12 +9,12 @@ final class UpdateChecker: ObservableObject {
         let page: URL
     }
 
-    /// The alert's text. Templates take {0} like `Strings.fill`.
+    /// The alert's text in the current language. Templates take {0} like `Strings.fill`.
     struct Wording {
-        var title = "{0} {1} is available"
-        var message = "You have version {0}. Download the new version from GitHub?"
-        var download = "Download"
-        var later = "Later"
+        var title = Strings.template(.updateTitle, language: Strings.current)
+        var message = Strings.template(.updateMessage, language: Strings.current)
+        var download = Strings.text(.updateDownload)
+        var later = Strings.text(.updateLater)
     }
 
     @Published private(set) var available: Release?
@@ -26,10 +26,10 @@ final class UpdateChecker: ObservableObject {
     private static let announcedKey = "updateAnnouncedVersion"
 
     /// - Parameter repo: "owner/name" on GitHub.
-    init(appName: String, repo: String, wording: Wording = Wording()) {
+    init(appName: String, repo: String, wording: @autoclosure () -> Wording = Wording()) {
         self.appName = appName
         latestURL = URL(string: "https://api.github.com/repos/\(repo)/releases/latest")!
-        self.wording = wording
+        self.wording = wording()
     }
 
     var currentVersion: String {
@@ -94,10 +94,6 @@ final class UpdateChecker: ObservableObject {
     }
 
     private static func fill(_ template: String, _ values: String...) -> String {
-        var text = template
-        for (index, value) in values.enumerated() {
-            text = text.replacingOccurrences(of: "{\(index)}", with: value)
-        }
-        return text
+        Strings.fill(template, values)
     }
 }
